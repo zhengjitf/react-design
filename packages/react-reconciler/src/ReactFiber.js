@@ -581,6 +581,7 @@ export function resetWorkInProgress(
 
 export function createHostRootFiber(tag: RootTag): Fiber {
   let mode;
+  // tag 默认为 LegacyRoot
   if (tag === ConcurrentRoot) {
     mode = ConcurrentMode | BlockingMode | StrictMode;
   } else if (tag === BlockingRoot) {

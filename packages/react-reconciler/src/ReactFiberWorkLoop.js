@@ -294,6 +294,7 @@ let spawnedWorkDuringRender: null | Array<ExpirationTime> = null;
 let currentEventTime: ExpirationTime = NoWork;
 
 export function requestCurrentTimeForUpdate() {
+  // 执行上下文处于 render 或 commit 时
   if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
     // We're inside React, so it's fine to read the actual time.
     return msToExpirationTime(now());
@@ -318,23 +319,23 @@ export function computeExpirationForFiber(
   suspenseConfig: null | SuspenseConfig,
 ): ExpirationTime {
   const mode = fiber.mode;
-  if ((mode & BlockingMode) === NoMode) {
+  if ((mode & BlockingMode) === NoMode) { // 不包含 blocking 模式
     return Sync;
   }
 
   const priorityLevel = getCurrentPriorityLevel();
-  if ((mode & ConcurrentMode) === NoMode) {
+  if ((mode & ConcurrentMode) === NoMode) { // 不包含 concurrent 模式
     return priorityLevel === ImmediatePriority ? Sync : Batched;
   }
 
-  if ((executionContext & RenderContext) !== NoContext) {
+  if ((executionContext & RenderContext) !== NoContext) { // 包含 RenderContext
     // Use whatever time we're already rendering
     // TODO: Should there be a way to opt out, like with `runWithPriority`?
     return renderExpirationTime;
   }
 
   let expirationTime;
-  if (suspenseConfig !== null) {
+  if (suspenseConfig !== null) { // 如果是 suspense ?
     // Compute an expiration time based on the Suspense timeout.
     expirationTime = computeSuspenseExpiration(
       currentTime,
@@ -380,7 +381,7 @@ export function scheduleUpdateOnFiber(
   fiber: Fiber,
   expirationTime: ExpirationTime,
 ) {
-  checkForNestedUpdates();
+  checkForNestedUpdates(); // 检查嵌套更新个数是否超过限制
   warnAboutRenderPhaseUpdatesInDEV(fiber);
 
   const root = markUpdateTimeFromFiberToRoot(fiber, expirationTime);
@@ -462,10 +463,11 @@ function markUpdateTimeFromFiberToRoot(fiber, expirationTime) {
     alternate.expirationTime = expirationTime;
   }
   // Walk the parent path to the root and update the child expiration time.
+  // 往父级遍历，更新 childExpirationTime
   let node = fiber.return;
   let root = null;
   if (node === null && fiber.tag === HostRoot) {
-    root = fiber.stateNode;
+    root = fiber.stateNode; // FiberRoot
   } else {
     while (node !== null) {
       alternate = node.alternate;
@@ -1184,8 +1186,8 @@ export function discreteUpdates<A, B, C, D, R>(
 
 export function unbatchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
   const prevExecutionContext = executionContext;
-  executionContext &= ~BatchedContext;
-  executionContext |= LegacyUnbatchedContext;
+  executionContext &= ~BatchedContext; // 删除 BatchedContext
+  executionContext |= LegacyUnbatchedContext; // 添加 LegacyUnbatchedContext
   try {
     return fn(a);
   } finally {

@@ -116,6 +116,7 @@ function createRootImpl(
   const hydrate = options != null && options.hydrate === true;
   const hydrationCallbacks =
     (options != null && options.hydrationOptions) || null;
+  // root => FiberRoot
   const root = createContainer(container, tag, hydrate, hydrationCallbacks);
   markContainerAsRoot(root.current, container);
   if (hydrate && tag !== LegacyRoot) {
@@ -152,10 +153,15 @@ export function createBlockingRoot(
   return new ReactDOMBlockingRoot(container, BlockingRoot, options);
 }
 
+// 创建 FiberRoot 实例
+// 返回值 => { _internalRoot:  }
 export function createLegacyRoot(
   container: Container,
   options?: RootOptions,
 ): RootType {
+  // blocking 模式？
+  // LegacyRoot 只是一个 FiberRoot 的 tag 标识
+  // ReactDOM.render流程：options => { hydrate: true } 或者 undefined
   return new ReactDOMBlockingRoot(container, LegacyRoot, options);
 }
 

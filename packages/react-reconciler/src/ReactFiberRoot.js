@@ -103,7 +103,7 @@ export type FiberRoot = {
   ...
 };
 
-function FiberRootNode(containerInfo, tag, hydrate) {
+function FiberRootNode(containerInfo, tag: RootTag, hydrate): FiberRoot {
   this.tag = tag;
   this.current = null;
   this.containerInfo = containerInfo;
@@ -136,10 +136,11 @@ function FiberRootNode(containerInfo, tag, hydrate) {
 
 export function createFiberRoot(
   containerInfo: any,
-  tag: RootTag,
+  tag: RootTag, // Legacy、Blocking、Concurrent 三种模式
   hydrate: boolean,
   hydrationCallbacks: null | SuspenseHydrationCallbacks,
 ): FiberRoot {
+  // 通过 FiberRootNode 构造函数创建 FiberRoot
   const root: FiberRoot = (new FiberRootNode(containerInfo, tag, hydrate): any);
   if (enableSuspenseCallback) {
     root.hydrationCallbacks = hydrationCallbacks;
@@ -147,10 +148,17 @@ export function createFiberRoot(
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
+  // 创建一个 RootFiber，和 FiberRoot 相互引用
+  /**
+   *           ---- current --->
+   *  FiberRoot                  RootFiber
+   *           <---- stateNode --
+   */
   const uninitializedFiber = createHostRootFiber(tag);
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;
 
+  // 初始化一个更新队列对象 `queue`，赋值给 fiber 的 updateQueue 属性
   initializeUpdateQueue(uninitializedFiber);
 
   return root;
@@ -226,6 +234,8 @@ export function markRootFinishedAtTime(
   remainingExpirationTime: ExpirationTime,
 ): void {
   // Update the range of pending times
+  // firstPendingTime 记录的是最大的 expirationTime
+  // lastPendingTime 记录的是最小的 expirationTime
   root.firstPendingTime = remainingExpirationTime;
 
   // Update the range of suspended times. Treat everything higher priority or

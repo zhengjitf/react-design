@@ -110,6 +110,7 @@ function shouldHydrateDueToLegacyHeuristic(container) {
   );
 }
 
+// 根据挂载 dom 元素创建 FiberRoot
 function legacyCreateRootFromDOMContainer(
   container: Container,
   forceHydrate: boolean,
@@ -117,6 +118,7 @@ function legacyCreateRootFromDOMContainer(
   const shouldHydrate =
     forceHydrate || shouldHydrateDueToLegacyHeuristic(container);
   // First clear any existing content.
+  // 非 SSR 模式下，清空 container 下的子元素
   if (!shouldHydrate) {
     let warned = false;
     let rootSibling;
@@ -173,9 +175,9 @@ function warnOnInvalidCallback(callback: mixed, callerName: string): void {
 }
 
 function legacyRenderSubtreeIntoContainer(
-  parentComponent: ?React$Component<any, any>,
-  children: ReactNodeList,
-  container: Container,
+  parentComponent: ?React$Component<any, any>, // React.render流程：该参数为 null
+  children: ReactNodeList, // React.render流程：React Element
+  container: Container, // React.render流程：挂载的 dom 元素
   forceHydrate: boolean,
   callback: ?Function,
 ) {
@@ -186,10 +188,13 @@ function legacyRenderSubtreeIntoContainer(
 
   // TODO: Without `any` type, Flow says "Property cannot be accessed on any
   // member of intersection type." Whyyyyyy.
+  // 第一次挂载的时候，container 上没有这个属性
+  // root => { ...., _internalRoot: FiberRoot }
   let root: RootType = (container._reactRootContainer: any);
   let fiberRoot;
   if (!root) {
     // Initial mount
+    // 创建 FiberRoot，并挂载到 container 的 _reactRootContainer 属性上
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
       forceHydrate,
@@ -284,10 +289,11 @@ export function hydrate(
   );
 }
 
+// 应用入口：ReactDom.render()
 export function render(
-  element: React$Element<any>,
-  container: Container,
-  callback: ?Function,
+  element: React$Element<any>, // React Element
+  container: Container, // 挂载的容器 dom 元素
+  callback: ?Function, // 一般不会传入该回调函数
 ) {
   invariant(
     isValidContainer(container),

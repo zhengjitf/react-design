@@ -210,9 +210,11 @@ export function enqueueUpdate<State>(fiber: Fiber, update: Update<State>) {
   }
 
   const sharedQueue = updateQueue.shared;
+  // pending 表示正在进行的更新？
   const pending = sharedQueue.pending;
   if (pending === null) {
     // This is the first update. Create a circular list.
+    // 单向循环链表
     update.next = update;
   } else {
     update.next = pending.next;
