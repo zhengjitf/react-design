@@ -1,4 +1,5 @@
 ## render
+
 ```jsx
 ReactDOM.render(<App/>, document.getElementById('root'))
 ```
@@ -27,7 +28,7 @@ unbatchedUpdates(() => {
   updateContainer(children, fiberRoot, parentComponent, callback);
 });
 ```
-`updateContainer` 内部调用了 `scheduleUpdateOnFiber`，调度从这里开始
+`updateContainer` 内部调用了 `scheduleUpdateOnFiber (scheduleWork)`，调度从这里开始
 
 
 ## FiberRoot 与 RootFiber
@@ -83,6 +84,7 @@ type Fiber = {
 
   // The value of element.type which is used to preserve the identity during
   // reconciliation of this child.
+  // ReactElement.type，也就是我们调用`createElement`的第一个参数
   elementType: any,
 
   // The resolved function/class/ associated with this fiber.
@@ -174,6 +176,8 @@ type Fiber = {
 ## workInProgress
 对应 `fiber.alternate`
 
+
+## render 的调度和 commit 过程
 
 ```
 updateContainer => scheduleUpdateOnFiber => performSyncWorkOnRoot => commitRoot => commitRootImpl =>  commitMutationEffects => commitPlacement => insertOrAppendPlacementNodeIntoContainer => appendChildToContainer

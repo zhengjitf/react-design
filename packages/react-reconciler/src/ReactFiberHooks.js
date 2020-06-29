@@ -840,23 +840,28 @@ function rerenderReducer<S, I, A>(
 function mountState<S>(
   initialState: (() => S) | S,
 ): [S, Dispatch<BasicStateAction<S>>] {
+  // 生成一个 workInProgressHook（第一个 hook） 挂载到 workInProgress.memoizedState，第二个 hook 挂载到 workInProgressHook 的 next 属性上，以此类推
   const hook = mountWorkInProgressHook();
+  // 初始值参数可以传递一个函数，以返回值作为初始值
   if (typeof initialState === 'function') {
     // $FlowFixMe: Flow doesn't like mixed types
     initialState = initialState();
   }
   hook.memoizedState = hook.baseState = initialState;
   const queue = (hook.queue = {
+    // 更新对象
     pending: null,
     dispatch: null,
+    // 该参数对于 useState 为 basicStateReducer，不会变更
     lastRenderedReducer: basicStateReducer,
+    // 已渲染于视图的最新状态值
     lastRenderedState: (initialState: any),
   });
   const dispatch: Dispatch<
     BasicStateAction<S>,
   > = (queue.dispatch = (dispatchAction.bind(
     null,
-    currentlyRenderingFiber,
+    currentlyRenderingFiber, // workInProgress
     queue,
   ): any));
   return [hook.memoizedState, dispatch];
@@ -1365,6 +1370,7 @@ function dispatchAction<S, A>(
         warnIfNotCurrentlyActingUpdatesInDev(fiber);
       }
     }
+    // 开始调度
     scheduleWork(fiber, expirationTime);
   }
 }
