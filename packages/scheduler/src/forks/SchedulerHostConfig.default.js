@@ -102,13 +102,13 @@ if (
     typeof performance === 'object' &&
     typeof performance.now === 'function'
   ) {
-    getCurrentTime = () => performance.now();
+    getCurrentTime = () => performance.now(); // performance.now() 精度更高：MDN 说这个时间戳实际上并不是高精度的 😄
   } else {
     const initialTime = Date.now();
     getCurrentTime = () => Date.now() - initialTime;
   }
 
-  let isMessageLoopRunning = false;
+  let isMessageLoopRunning = false; // 表示是否调用了 port.postMessage(null)，在回调调用之前
   let scheduledHostCallback = null;
   let taskTimeoutID = -1;
 
@@ -169,6 +169,7 @@ if (
     requestPaint = function() {};
   }
 
+  /** 设置帧率 */
   forceFrameRate = function(fps) {
     if (fps < 0 || fps > 125) {
       // Using console['error'] to evade Babel and ESLint
@@ -195,6 +196,7 @@ if (
       deadline = currentTime + yieldInterval;
       const hasTimeRemaining = true;
       try {
+        // scheduledHostCallback => flushWork
         const hasMoreWork = scheduledHostCallback(
           hasTimeRemaining,
           currentTime,

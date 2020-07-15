@@ -5,31 +5,6 @@ ReactDOM.render(<App/>, document.getElementById('root'))
 ```
 这句代码通常作为 `React` 应用的入口，将组件挂载到实际的 `DOM` 元素内
 
-[起点](/packages/react-dom/src/client/ReactDOMLegacy.js)
-```js
-function render(
-  element: React$Element<any>, // React Element
-  container: Container, // 挂载的容器 dom 元素
-  callback: ?Function, // 一般不会传入该回调函数
-) {
-  return legacyRenderSubtreeIntoContainer(
-    null,
-    element,
-    container,
-    false,
-    callback,
-  );
-}
-```
-
-[终点](/packages/react-dom/src/client/ReactDOMLegacy.js)
-```js
-unbatchedUpdates(() => {
-  updateContainer(children, fiberRoot, parentComponent, callback);
-});
-```
-`updateContainer` 内部调用了 `scheduleUpdateOnFiber (scheduleWork)`，调度从这里开始
-
 
 ## FiberRoot 与 RootFiber
 `FiberRoot`：由挂载容器 (DOM 元素) 生成的一个对象
@@ -77,6 +52,7 @@ export function createFiberRoot(
 
 type Fiber = {
   // Tag identifying the type of fiber.
+  // fiber类型：FunctionComponent、ClassComponent....
   tag: WorkTag,
 
   // Unique identifier of this child.
@@ -91,6 +67,8 @@ type Fiber = {
   type: any,
 
   // The local state associated with this fiber.
+  // RootFiber.stateNode => FiberRoot
+  // 其余 Fiber 的 stateNode 一般指向真实 DOM 元素
   stateNode: any,
 
   // Conceptual aliases
@@ -139,6 +117,7 @@ type Fiber = {
   mode: TypeOfMode,
 
   // Effect
+  // 保存本次更新会造成的DOM操作
   effectTag: SideEffectTag,
 
   // Singly linked list fast path to the next fiber with side-effects.
@@ -147,6 +126,7 @@ type Fiber = {
   // The first and last fiber with side-effect within this subtree. This allows
   // us to reuse a slice of the linked list when we reuse the work done within
   // this fiber.
+  // 以当前 fiber 为起点的子树中的第一个/最后一个带有副作用（effectTag）的 fiber 结点，中间的结点用 nextEffect 连接
   firstEffect: Fiber | null,
   lastEffect: Fiber | null,
 
@@ -168,18 +148,48 @@ type Fiber = {
 ![](./images/fiber-tree.png)
 
 
-## beginWork
+## 第一次 render 流程
+
 ```js
-// packages/react-reconciler/src/ReactFiberBeginWork.old.js
-```
+// packages/react-dom/src/client/ReactDOMLegacy.js
+render =>
 
-## workInProgress
-对应 `fiber.alternate`
+// packages/react-reconciler/src/ReactFiberReconciler.js
+updateContainer => 
 
+// packages/react-reconciler/src/ReactFiberWorkLoop.js
+scheduleWork (scheduleUpdateOnFiber) => performSyncWorkOnRoot
 
-## render 的调度和 commit 过程
+performSyncWorkOnRoot => workLoopSync ( => performUnitOfWork => 
+// packages/react-reconciler/src/ReactFiberBeginWork.js
+(beginWork => update**Component => reconcileChildren => mountChildFibers / reconcileChildFibers) -> completeUnitOfWork )
 
-```
-updateContainer => scheduleUpdateOnFiber => performSyncWorkOnRoot => commitRoot => commitRootImpl =>  commitMutationEffects => commitPlacement => insertOrAppendPlacementNodeIntoContainer => appendChildToContainer
+performSyncWorkOnRoot => finishSyncRender => commitRoot => commitRootImpl => commitMutationEffects => 
+
+// packages/react-reconciler/src/ReactFiberCommitWork.js
+commitPlacement => insertOrAppendPlacementNodeIntoContainer => 
+
+// packages/react-dom/src/client/ReactDOMHostConfig.js
+appendChildToContainer
 ```
 生命周期函数在 `commitRootImpl` 中被调用
+
+### ReactElement
+
+```ts
+type ReactElement = {|
+  $$typeof: any,
+  type: any,
+  key: any,
+  ref: any,
+  props: any,
+  // ReactFiber: 记录负责创建此元素的组件
+  _owner: any,
+
+  // __DEV__
+  _store: {validated: boolean, ...},
+  _self: React$Element<any>,
+  _shadowChildren: any,
+  _source: Source,
+|};
+```

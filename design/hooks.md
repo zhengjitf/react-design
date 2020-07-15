@@ -1,6 +1,9 @@
 ## mount 阶段
 
 ```js
+// packages/react-reconciler/src/ReactFiberBeginWork.js
+updateFunctionComponent =>
+
 // packages/react-reconciler/src/ReactFiberHooks.js
 renderWithHooks => ReactCurrentDispatcher.current = HooksDispatcherOnMount => 
 

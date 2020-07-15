@@ -2896,6 +2896,7 @@ function beginWork(
     }
   }
 
+  // current 为 null 表示该执行 mount 操作，否则执行 update 操作
   if (current !== null) {
     const oldProps = current.memoizedProps;
     const newProps = workInProgress.pendingProps;

@@ -266,6 +266,7 @@ function warnOnFunctionType() {
 // a compiler or we can do it manually. Helpers that don't need this branching
 // live outside of this function.
 function ChildReconciler(shouldTrackSideEffects) {
+  // 将父级 fiber 的 lastEffect 指向要删除的 fiber，并设置要删除的 fiber 的 effectTag 为 Deletion
   function deleteChild(returnFiber: Fiber, childToDelete: Fiber): void {
     if (!shouldTrackSideEffects) {
       // Noop.
