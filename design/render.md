@@ -164,6 +164,7 @@ performSyncWorkOnRoot => workLoopSync ( => performUnitOfWork =>
 // packages/react-reconciler/src/ReactFiberBeginWork.js
 (beginWork => update**Component => reconcileChildren => mountChildFibers / reconcileChildFibers) -> completeUnitOfWork )
 
+// packages/react-reconciler/src/ReactFiberWorkLoop.js
 performSyncWorkOnRoot => finishSyncRender => commitRoot => commitRootImpl => commitMutationEffects => 
 
 // packages/react-reconciler/src/ReactFiberCommitWork.js

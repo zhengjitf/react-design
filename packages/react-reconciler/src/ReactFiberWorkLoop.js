@@ -391,7 +391,7 @@ export function scheduleUpdateOnFiber(
   }
 
   checkForInterruption(fiber, expirationTime);
-  recordScheduleUpdate();
+  recordScheduleUpdate(); // 用于调试
 
   // TODO: computeExpirationForFiber also reads the priority. Pass the
   // priority as an argument to that function and this one.
@@ -1828,6 +1828,7 @@ function commitRootImpl(root, renderPriorityLevel) {
         }
       } else {
         try {
+          // 执行 DOM 操作以前的逻辑处理
           commitBeforeMutationEffects();
         } catch (error) {
           invariant(nextEffect !== null, 'Should be working on an effect.');
@@ -1864,6 +1865,7 @@ function commitRootImpl(root, renderPriorityLevel) {
         }
       } else {
         try {
+          // 执行 DOM 操作
           commitMutationEffects(root, renderPriorityLevel);
         } catch (error) {
           invariant(nextEffect !== null, 'Should be working on an effect.');
@@ -2160,6 +2162,7 @@ function commitLayoutEffects(
       );
     }
 
+    // 赋值 ref
     if (effectTag & Ref) {
       recordEffect();
       commitAttachRef(nextEffect);

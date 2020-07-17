@@ -7,6 +7,8 @@
  * @flow strict
  */
 
+// 最小堆
+
 type Heap = Array<Node>;
 type Node = {|
   id: number,
@@ -24,6 +26,7 @@ export function peek(heap: Heap): Node | null {
   return first === undefined ? null : first;
 }
 
+// 弹出首位？
 export function pop(heap: Heap): Node | null {
   const first = heap[0];
   if (first !== undefined) {

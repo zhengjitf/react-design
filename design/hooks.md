@@ -1,3 +1,5 @@
+# useState
+
 ## mount 阶段
 
 ```js
@@ -68,4 +70,9 @@ HooksDispatcherOnUpdate.useState => updateState ( return [hook.memoizedState, di
 
 在 `updateWorkInProgressHook` 中存放了一个指针 `currentHook` 指向当前的 `Hook`，取的是 `mount` 阶段挂载到 fiber 对象 memoizedState 属性上的 hook（链表），执行一个 hook 函数后，`currentHook` 指向 `currentHook.next`，所以每次 hook 函数调用的顺序必须一致，或者说每次 render 所有 hook 函数都得调用，不能有条件判断控制 hook 函数调用
 
+# useEffect
 
+```js
+// packages/react-reconciler/src/ReactFiberCommitWork.js
+commitHookEffectListMount
+```

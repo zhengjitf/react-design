@@ -822,13 +822,14 @@ function ChildReconciler(shouldTrackSideEffects) {
       } else {
         nextOldFiber = oldFiber.sibling;
       }
+      // 用 oldFiber 与 newChild 对比，如果可以复用返回更新后的 fiber，否则返回 null
       const newFiber = updateSlot(
         returnFiber,
         oldFiber,
         newChildren[newIdx],
         expirationTime,
       );
-      if (newFiber === null) {
+      if (newFiber === null) { // 如果不能复用，跳出循环
         // TODO: This breaks on empty slots like null children. That's
         // unfortunate because it triggers the slow path all the time. We need
         // a better way to communicate whether this was a miss or null,

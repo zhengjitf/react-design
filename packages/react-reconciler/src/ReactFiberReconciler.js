@@ -234,7 +234,7 @@ export function updateContainer(
   if (__DEV__) {
     onScheduleRoot(container, element);
   }
-  const current = container.current;
+  const current = container.current; // rootFiber
   const currentTime = requestCurrentTimeForUpdate();
   if (__DEV__) {
     // $FlowExpectedError - jest isn't a global, and isn't recognized outside of tests
@@ -274,6 +274,7 @@ export function updateContainer(
     }
   }
 
+  // 创建更新对象，载体中包含 element
   const update = createUpdate(expirationTime, suspenseConfig);
   // Caution: React DevTools currently depends on this property
   // being called "element".
@@ -293,7 +294,9 @@ export function updateContainer(
     update.callback = callback;
   }
 
+  // 创建 rootFiber 时（createFiberRoot），会初始化一个 updateQueue
   enqueueUpdate(current, update);
+  // 开始调度
   scheduleWork(current, expirationTime);
 
   return expirationTime;
