@@ -403,7 +403,7 @@ export function scheduleUpdateOnFiber(
       (executionContext & LegacyUnbatchedContext) !== NoContext &&
       // Check if we're not already rendering
       (executionContext & (RenderContext | CommitContext)) === NoContext
-    ) {
+    ) { // 如果是 unbatchedUpdates 中执行 setState 会同步执行更新
       // Register pending interactions on the root to avoid losing traced interaction data.
       schedulePendingInteractions(root, expirationTime);
 
@@ -412,9 +412,10 @@ export function scheduleUpdateOnFiber(
       // should be deferred until the end of the batch.
       performSyncWorkOnRoot(root);
     } else {
+      // 如果是 react 事件回调中或 batchedUpdates 中调用 setState，每次调度生成更新对象，最终批量执行更新操作(commitRoot)
       ensureRootIsScheduled(root);
       schedulePendingInteractions(root, expirationTime);
-      if (executionContext === NoContext) {
+      if (executionContext === NoContext) { // 比如 setTimeout 或 原生事件回调中调用 setState，会同步执行更新
         // Flush the synchronous work now, unless we're already working or inside
         // a batch. This is intentionally inside scheduleUpdateOnFiber instead of
         // scheduleCallbackForFiber to preserve the ability to schedule a callback
