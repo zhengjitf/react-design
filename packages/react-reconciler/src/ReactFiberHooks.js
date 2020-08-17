@@ -673,16 +673,55 @@ function updateReducer<S, I, A>(
 
   // The last pending update that hasn't been processed yet.
   let pendingQueue = queue.pending;
+  // 将 queue.pending 的链表连接到 baseQueue
   if (pendingQueue !== null) {
     // We have new updates that haven't been processed yet.
     // We'll add them to the base queue.
+    /**
+     *  current.baseQueue
+     *            #
+     *    bu1 -> bu2 -> bu0
+     *     ^_____________|
+     *
+     *  queue
+     *          #
+     *    u1 -> u2 -> u0
+     *     ^__________|
+     *
+     *
+     */
     if (baseQueue !== null) {
       // Merge the pending queue and the base queue.
-      let baseFirst = baseQueue.next;
-      let pendingFirst = pendingQueue.next;
+      let baseFirst = baseQueue.next; // bu0
+      let pendingFirst = pendingQueue.next; // u0
+      /**
+       *
+       *  baseQueue => bu2
+       *
+       *          #                  #
+       *  bu1 -> bu2 -> u0 -> u1 -> u2
+       *   ^              ^___________|
+       *   |__ bu0
+       */
       baseQueue.next = pendingFirst;
+      /**
+       * pendingQueue => u2
+       *
+       *          #                  #
+       *  bu1 -> bu2 -> u0 -> u1 -> u2 -> bu0
+       *   ^_______________________________|
+       *
+       */
       pendingQueue.next = baseFirst;
     }
+    /**
+     *  current.baseQueue = baseQueue = pendingQueue => u2
+     *
+     *  #
+     *  u2 -> bu0 -> bu1 -> bu2 -> u0 -> u1
+     *  ^_________________________________|
+     *
+     */
     current.baseQueue = baseQueue = pendingQueue;
     queue.pending = null;
   }
@@ -1300,6 +1339,34 @@ function dispatchAction<S, A>(
   if (__DEV__) {
     update.priority = getCurrentPriorityLevel();
   }
+
+  /**
+   * TIPS: # 位置是 queue.pending
+   *
+   * 1. queue.pending === null
+   *         #
+   *        u0 -> u0
+   *        ^_____|
+   *
+   * 2. queue.pending !== null
+   *    创建 u1
+   *      update.next = pending.next => u1.next = u0.next = u0
+   *      pending.next = update => u0.next = u1
+   *         #
+   *        u1 -> u0
+   *         ^____|
+   *
+   *    创建 u2
+   *      update.next = pending.next => u2.next = u1.next = u0
+   *      pending.next = update => u1.next = u2
+   *               #
+   *        u1 -> u2 -> u0
+   *         ^___________|
+   *
+   * 所以 queue 是个循环链表
+   *  queue.pending 指向最后插入的 update
+   *  queue.pending.next 指向第一个插入的 update
+   */
 
   // Append the update to the end of the list.
   const pending = queue.pending;

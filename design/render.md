@@ -13,6 +13,62 @@ ReactDOM.render(<App/>, document.getElementById('root'))
 ### 创建 FiberRoot
 
 ```js
+type FiberRoot = {
+  // The type of root (legacy, batched, concurrent, etc.)
+  tag: RootTag,
+
+  // Any additional information from the host associated with this root.
+  containerInfo: any,
+  // Used only by persistent updates.
+  pendingChildren: any,
+  // The currently active root fiber. This is the mutable root of the tree.
+  current: Fiber,
+
+  pingCache:
+    | WeakMap<Thenable, Set<ExpirationTime>>
+    | Map<Thenable, Set<ExpirationTime>>
+    | null,
+
+  finishedExpirationTime: ExpirationTime,
+  // A finished work-in-progress HostRoot that's ready to be committed.
+  finishedWork: Fiber | null,
+  // Timeout handle returned by setTimeout. Used to cancel a pending timeout, if
+  // it's superseded by a new one.
+  timeoutHandle: TimeoutHandle | NoTimeout,
+  // Top context object, used by renderSubtreeIntoContainer
+  context: Object | null,
+  pendingContext: Object | null,
+  // Determines if we should attempt to hydrate on the initial mount
+  +hydrate: boolean,
+  // Node returned by Scheduler.scheduleCallback
+  callbackNode: {
+    id: number,
+    callback: Function,
+    priorityLevel: number,
+    startTime: number,
+    expirationTime: number,
+    sortIndex: number,
+  },
+  // Expiration of the callback associated with this root
+  callbackExpirationTime: ExpirationTime,
+  // Priority of the callback associated with this root
+  callbackPriority: ReactPriorityLevel,
+  // The earliest pending expiration time that exists in the tree
+  firstPendingTime: ExpirationTime,
+  // The earliest suspended expiration time that exists in the tree
+  firstSuspendedTime: ExpirationTime,
+  // The latest suspended expiration time that exists in the tree
+  lastSuspendedTime: ExpirationTime,
+  // The next known expiration time after the suspended range
+  nextKnownPendingLevel: ExpirationTime,
+  // The latest time at which a suspended component pinged the root to
+  // render again
+  lastPingedTime: ExpirationTime,
+  lastExpiredTime: ExpirationTime,
+}
+```
+
+```js
 // packages/react-reconciler/src/ReactFiberRoot.old.js#L59-L87
 
 export function createFiberRoot(
