@@ -196,7 +196,7 @@ if (
       deadline = currentTime + yieldInterval;
       const hasTimeRemaining = true;
       try {
-        // scheduledHostCallback => flushWork
+        // scheduledHostCallback = flushWork -> workLoop
         const hasMoreWork = scheduledHostCallback(
           hasTimeRemaining,
           currentTime,

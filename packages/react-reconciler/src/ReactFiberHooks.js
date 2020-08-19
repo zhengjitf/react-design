@@ -396,15 +396,18 @@ export function renderWithHooks(
       ReactCurrentDispatcher.current = HooksDispatcherOnMountInDEV;
     }
   } else {
+    // mount 阶段
     ReactCurrentDispatcher.current =
       current === null || current.memoizedState === null
         ? HooksDispatcherOnMount
         : HooksDispatcherOnUpdate;
   }
 
+  // 调用函数组件
   let children = Component(props, secondArg);
 
   // Check if there was a render phase update
+  // 渲染过程中更新
   if (workInProgress.expirationTime === renderExpirationTime) {
     // Keep rendering in a loop for as long as render phase updates continue to
     // be scheduled. Use a counter to prevent infinite loops.

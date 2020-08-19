@@ -78,6 +78,7 @@ var isPerformingWork = false;
 var isHostCallbackScheduled = false;
 var isHostTimeoutScheduled = false;
 
+// 将 timerQueue 中到期的任务转移到 taskQueue
 function advanceTimers(currentTime) {
   // Check for tasks that are no longer delayed and add them to the queue.
   let timer = peek(timerQueue);
@@ -291,7 +292,7 @@ function timeoutForPriorityLevel(priorityLevel) {
       return NORMAL_PRIORITY_TIMEOUT;
   }
 }
-
+// 相关方法：ensureRootIsScheduled （packages/react-reconciler/src/ReactFiberWorkLoop.js）
 function unstable_scheduleCallback(priorityLevel, callback, options) {
   var currentTime = getCurrentTime();
 
@@ -327,7 +328,7 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
     newTask.isQueued = false;
   }
 
-  if (startTime > currentTime) {
+  if (startTime > currentTime) { // 延迟任务，插入 timerQueue
     // This is a delayed task.
     newTask.sortIndex = startTime;
     push(timerQueue, newTask);
@@ -342,7 +343,7 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
       // Schedule a timeout.
       requestHostTimeout(handleTimeout, startTime - currentTime);
     }
-  } else {
+  } else { // 其他任务，插入 taskQueue
     newTask.sortIndex = expirationTime;
     push(taskQueue, newTask);
     if (enableProfiling) {
