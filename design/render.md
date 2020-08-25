@@ -117,9 +117,11 @@ type Fiber = {
   // The value of element.type which is used to preserve the identity during
   // reconciliation of this child.
   // ReactElement.type，也就是我们调用`createElement`的第一个参数
+  // 大部分情况同 type，某些情况不同，比如 FunctionComponent 使用 React.memo 包裹
   elementType: any,
 
   // The resolved function/class/ associated with this fiber.
+  // 对于 FunctionComponent，指函数本身，对于ClassComponent，指class，对于HostComponent，指DOM节点tagName
   type: any,
 
   // The local state associated with this fiber.
@@ -173,7 +175,7 @@ type Fiber = {
   mode: TypeOfMode,
 
   // Effect
-  // 保存本次更新会造成的DOM操作
+  // 保存本次更新会造成的 DOM 操作
   effectTag: SideEffectTag,
 
   // Singly linked list fast path to the next fiber with side-effects.
