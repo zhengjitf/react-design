@@ -932,7 +932,7 @@ function pushEffect(tag, create, destroy, deps) {
   };
   let componentUpdateQueue: null | FunctionComponentUpdateQueue = (currentlyRenderingFiber.updateQueue: any);
   if (componentUpdateQueue === null) {
-    componentUpdateQueue = createFunctionComponentUpdateQueue();
+    componentUpdateQueue = createFunctionComponentUpdateQueue(); // { lastEffect: null }
     currentlyRenderingFiber.updateQueue = (componentUpdateQueue: any);
     componentUpdateQueue.lastEffect = effect.next = effect;
   } else {

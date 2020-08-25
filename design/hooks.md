@@ -1,3 +1,32 @@
+# 概览
+
+## memoizedState
+`fiber.memoizedState`：`FunctionComponent` 对应 `fiber` 保存的 `Hooks` 链表。
+`hook.memoizedState`：`Hooks` 链表中保存的单一 `hook` 对应的数据
+
+不同类型 `hook` 的 `memoizedState` 保存不同类型数据，具体如下：
+
+- `useState`：对于 `const [state, updateState] = useState(initialState)` ，`memoizedState` 保存 `state` 的值
+
+- `useReducer`：对于 `const [state, dispatch] = useReducer(reducer, {})`，`memoizedState` 保存 `state` 的值
+
+- `useEffect`：`memoizedState` 保存包含 `useEffect` 回调函数、依赖项等的链表数据结构 `effect`。`effect` 链表同时会保存在`fiber.updateQueue` 中
+```js
+type Effect = {
+  tag: HookEffectTag,
+  create: () => (() => void) | void,
+  destroy: (() => void) | void,
+  deps: Array<mixed> | null,
+  next: Effect,
+}
+```
+
+- `useRef`：对于 `useRef(1)` ，`memoizedState` 保存 `{current: 1}`
+
+- `useMemo`：对于 `useMemo(callback, [depA])`，`memoizedState` 保存 `[callback(), depA]`
+
+- `useCallback`：对于 `useCallback(callback, [depA])`，`memoizedState` 保存`[callback, depA]`。与 `useMemo` 的区别是，`useCallback` 保存的是 `callback` 函数本身，而 `useMemo` 保存的是 `callback` 函数的执行结果
+
 # useState
 
 ## mount 阶段
@@ -72,7 +101,15 @@ HooksDispatcherOnUpdate.useState => updateState ( return [hook.memoizedState, di
 
 # useEffect
 
+## mount 阶段
 ```js
+// packages/react-reconciler/src/ReactFiberHooks.js
+// 在 mountEffectImpl 内 
+mountEffect => mountEffectImpl => pushEffect
+
+
+commitBeforeMutationEffects => flushPassiveEffects (scheduleCallback) => flushPassiveEffectsImpl => commitPassiveHookEffects => commitHookEffectListUnmount => commitHookEffectListMount =>
+
 // packages/react-reconciler/src/ReactFiberCommitWork.js
 commitHookEffectListMount
 ```
